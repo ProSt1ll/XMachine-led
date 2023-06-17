@@ -27,7 +27,9 @@
 
 
 #define STEPS_CNT_RANGE 7
-#define MAX_RANGE 700
+#define MAX_RANGE 1024
+#define MIN_RANGE 80
+
 double stepp= MAX_RANGE/STEPS_CNT_RANGE;
 
 
@@ -35,16 +37,13 @@ double stepp= MAX_RANGE/STEPS_CNT_RANGE;
 byte BRIGHTNESS = 0;
 byte STEP_BRIGHT;
 uint8_t current_color;
-int j_pred;
+int j_pred=STEPS_CNT_RANGE;
 int val_pred;
-int val_predd;
+int val_predd=MAX_RANGE;
 #define OFFSET 8
 int num_leds[8] ={FIRST,SECOND,THIRD,FOURTH,FIFTH,SIXTH,SEVENTH,EIGHTH};
 
-class LED{
-  public:
-    
-  }
+
 CRGB leds1[FIRST];
 CRGB leds2[SECOND+THIRD];
 CRGB leds4[int(FOURTH)];
@@ -94,11 +93,38 @@ void setup() {
   COLOR=128;
   SATURATION2=0;
   
-  BRIGHT[0]=180;
-  BRIGHT[1]=180;
-  BRIGHT[2]=100;        
+  BRIGHT[0]=100;
+  BRIGHT[1]=100;
+  BRIGHT[2]=100; 
+  BRIGHT[3]=100;
+  BRIGHT[4]=100;
+  BRIGHT[5]=100;
+  BRIGHT[6]=60;
+  BRIGHT[7]=180;  
+//
+//         for(int i=0;i<NUM_STRIPS;i++){
+//    //turn_on(i,COLOR,SATURATION,BRIGHTNESS)
+//    // i - не трогать, остальные значения 0-255
+//    turn_on(i,COLOR,SATURATION2,BRIGHT[i]);
+//    
+//    }
+////
+//    for(int i=0;i<NUM_STRIPS;i++){
+//    //turn_on(i,COLOR,SATURATION,BRIGHTNESS)
+//    // i - не трогать, остальные значения 0-255
+//    turn_on(i,0,0,MIN_BRIGHT);
+//    }
+//  }
+  processing(0);
+  delay(10000);
+}
+  void loop(){
+    read_ports();
   }
+void initLED(){
 
+    FastLED.showColor(CRGB::White);
+  }
 void read_buttons() {
   bool CHECK_BTN_2_STATE = digitalRead(11);
   bool CHECK_BTN_1_STATE = digitalRead(12);
@@ -126,13 +152,13 @@ void read_buttons() {
 
 bool alarm_flag=false;
 void read_ports() {
-  delay(1000);
   int val = -1;
   val=analogRead(A0);
-    Serial.println();   
+    Serial.println("val:");   
   Serial.println(val);
+   Serial.println(MAX_RANGE-val);
   //int flag = digitalRead(0);
-  processing(val);
+  processing(MAX_RANGE-val);
 //  if(flag == LOW){
 //    Serial.println("process");
 //    processing(val);
@@ -190,10 +216,19 @@ void alarm(){
   
 
 void processing(int val){
-    Serial.println(val);
+   
     if(abs(val-val_predd)<OFFSET){
       return;
       }
+    
+    if (val>MAX_RANGE){
+      val=MAX_RANGE;
+    }
+    if (val<MIN_RANGE){
+      val = MIN_RANGE;
+      }
+    
+
     val_predd=val;  
     
     Serial.print("step:");
@@ -220,12 +255,13 @@ void processing(int val){
            j_pred=j;
            
         }else{
-            smooth(j_pred+1,val_pred,MIN_BRIGHT);
+            turn_on2(j_pred+1,MIN_BRIGHT);
+            //smooth(j_pred+1,val_pred,MIN_BRIGHT);
             for(int i=j_pred;i>j+1;i--){
             Serial.print("off:");
             Serial.println(i);
-            smooth(i,MAX_BRIGHT,MIN_BRIGHT);
-            
+            //smooth(i,MAX_BRIGHT,MIN_BRIGHT);
+            turn_on2(i,MIN_BRIGHT);
           }
           val_pred=MAX_BRIGHT;
         }
