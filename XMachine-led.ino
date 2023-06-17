@@ -301,14 +301,6 @@ void color_palette() {
 Serial.println("change");  
 FastLED.clear();
 FastLED.show();
-//
-//turn_on2(0,0);
-//turn_on2(1,40);
-//turn_on2(2,80);
-//turn_on2(3,220);
-//turn_on2(4,160);
-//turn_on2(5,200);
-//turn_on2(6,225); 
       
 }
 
